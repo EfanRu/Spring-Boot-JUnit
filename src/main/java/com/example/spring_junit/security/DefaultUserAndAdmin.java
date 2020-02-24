@@ -21,13 +21,16 @@ public class DefaultUserAndAdmin {
     
     @Bean
     public void DefaultUserAndAdmin() {
+        Role adminRole = new Role("admin");
+        Role userRole = new Role("user");
+
         User user = new User();
         user.setFirstName("Default user");
         user.setLastName("Default user");
         user.setPhoneNumber(99L);
         user.setLogin(env.getProperty("db.default.user.login"));
         user.setPassword(env.getProperty("db.default.user.password"));
-        user.setRole(new Role("user"));
+        user.setRole(userRole);
         userService.addUser(user);
 
         User admin = new User();
@@ -36,7 +39,7 @@ public class DefaultUserAndAdmin {
         admin.setPhoneNumber(99L);
         admin.setLogin(env.getProperty("db.default.admin.login"));
         admin.setPassword(env.getProperty("db.default.admin.password"));
-        admin.setRole(new Role("admin"));
+        admin.setRole(adminRole);
         userService.addUser(admin);
     }
 }

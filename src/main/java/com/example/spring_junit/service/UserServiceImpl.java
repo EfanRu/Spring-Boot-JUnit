@@ -1,6 +1,7 @@
 package com.example.spring_junit.service;
 
 import com.example.spring_junit.dao.UserDao;
+import com.example.spring_junit.model.Role;
 import com.example.spring_junit.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,6 +43,15 @@ public class UserServiceImpl implements UserService {
         if (userFromDB.getLogin().equals("")) {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             userDao.addUser(user);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addRole(Role role) {
+        if (role != null) {
+            userDao.addRole(role);
             return true;
         }
         return false;
@@ -94,5 +104,10 @@ public class UserServiceImpl implements UserService {
     public User getUserById(String id) {
         User user = userDao.getUserById(id);
         return user == null ? new User() : user;
+    }
+
+    @Override
+    public Role getRoleByName(String name) {
+        return userDao.getRoleByName(name);
     }
 }

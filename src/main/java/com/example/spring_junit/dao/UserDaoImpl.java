@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.*;
 import java.util.List;
 
 @Repository
@@ -32,14 +29,64 @@ public class UserDaoImpl implements UserDao {
 
     @Transactional
     @Override
-    public boolean addUser(User u) {
+    public boolean addUser(User user) {
         try {
-            entityManager.persist(u);
+            if (!isRoleContains(user)) {
+                entityManager.persist(user.getRole());
+            }
+
+            user.setRole(getRoleByName(user.getRole().getName()));
+
+            entityManager.persist(user);
             return true;
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private boolean isRoleContains(User user) {
+        Query query = entityManager.createQuery("FROM Role r");
+        List<Role> list = query.getResultList();
+        for (Role r : list) {
+            if (r.getName().toUpperCase().equals(user.getRole().getName().toUpperCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Transactional
+    @Override
+    public boolean addRole(Role role) {
+        try {
+            entityManager.persist(role);
+            return true;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Role getRoleByName(String name) {
+        try {
+            Query query = entityManager.createQuery("FROM Role r WHERE r.name = :name");
+            query.setParameter("name", name);
+            return (Role) query.getSingleResult();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        Role newRole = new Role(name);
+        addRole(newRole);
+        name = newRole.getName();
+        try {
+            Query query = entityManager.createQuery("FROM Role r WHERE r.name = :name");
+            query.setParameter("name", name);
+            return (Role) query.getSingleResult();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Transactional
@@ -114,8 +161,8 @@ public class UserDaoImpl implements UserDao {
             Query query = entityManager.createQuery("FROM User u WHERE login = :login");
             query.setParameter("login", login);
             return (User) query.getSingleResult();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
+        } catch (RuntimeException ex) {
+            ex.printStackTrace();
         }
         return user;
     }
