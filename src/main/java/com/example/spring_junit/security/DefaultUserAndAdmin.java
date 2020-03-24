@@ -10,6 +10,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 @Component
 @PropertySource("classpath:application.properties")
 @Order(3)
@@ -21,8 +24,10 @@ public class DefaultUserAndAdmin {
     
     @Bean
     public void DefaultUserAndAdmin() {
-        Role adminRole = new Role("admin");
-        Role userRole = new Role("user");
+        Collection<Role> adminRole = new ArrayList<>();
+        Collection<Role> userRole = new ArrayList<>();
+        userRole.add(new Role("user"));
+        adminRole.add(new Role("admin"));
 
         User user = new User();
         user.setFirstName("Default user");

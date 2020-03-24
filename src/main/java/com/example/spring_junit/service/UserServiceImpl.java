@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -69,11 +71,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updateUser(String id, String firstName, String lastName, String phoneNumber, String role, String login, String password) {
+        Collection<Role> roles = new ArrayList<>();
+        roles.add(new Role(role));
         if (password != null && !password.equals("")) {
             password = bCryptPasswordEncoder.encode(password);
-            return userDao.updateUser(id, firstName, lastName, phoneNumber, role, login, password);
+            return userDao.updateUser(id, firstName, lastName, phoneNumber, roles, login, password);
         }
-        return userDao.updateUser(id, firstName, lastName, phoneNumber, role, login);
+        return userDao.updateUser(id, firstName, lastName, phoneNumber, roles, login);
     }
 
     @Override
@@ -84,7 +88,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(password);
             return userDao.updateUser(user);
         }
-        return userDao.updateUser(user.getId().toString(), user.getFirstName(), user.getLastName(), user.getPhoneNumber().toString(), user.getRole().getName(), user.getLogin());
+        return userDao.updateUser(user.getId().toString(), user.getFirstName(), user.getLastName(), user.getPhoneNumber().toString(), user.getRole(), user.getLogin());
     }
 
     public boolean checkAuth(String login, String password) {
@@ -107,7 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Role getRoleByName(String name) {
+    public Collection<Role> getRoleByName(Collection<String> name) {
         return userDao.getRoleByName(name);
     }
 }

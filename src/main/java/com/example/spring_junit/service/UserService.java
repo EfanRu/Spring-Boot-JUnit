@@ -4,6 +4,8 @@ import com.example.spring_junit.model.Role;
 import com.example.spring_junit.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import java.util.Collection;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {
@@ -16,5 +18,5 @@ public interface UserService extends UserDetailsService {
     boolean checkAuth(String login, String password);
     User getUserById(String id);
     User getUserByLogin(String login);
-    Role getRoleByName(String name);
+    Collection<Role> getRoleByName(Collection<String> name);
 }

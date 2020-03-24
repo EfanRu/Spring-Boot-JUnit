@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -32,10 +34,12 @@ public class UserDaoImpl implements UserDao {
     public boolean addUser(User user) {
         try {
             if (!isRoleContains(user)) {
-                entityManager.persist(user.getRole());
+                for (Role r : user.getRole()) {
+                    entityManager.persist(r);
+                }
             }
 
-            user.setRole(getRoleByName(user.getRole().getName()));
+//            user.setRole(getRoleByName(user.getRole()));
 
             entityManager.persist(user);
             return true;
@@ -49,8 +53,10 @@ public class UserDaoImpl implements UserDao {
         Query query = entityManager.createQuery("FROM Role r");
         List<Role> list = query.getResultList();
         for (Role r : list) {
-            if (r.getName().toUpperCase().equals(user.getRole().getName().toUpperCase())) {
-                return true;
+            for (Role rUser : user.getRole()) {
+                if (r.getName().toUpperCase().equals(rUser.getName().toUpperCase())) {
+                    return true;
+                }
             }
         }
         return false;
@@ -68,25 +74,31 @@ public class UserDaoImpl implements UserDao {
         return false;
     }
 
-    public Role getRoleByName(String name) {
+    public Collection<Role> getRoleByName(Collection<String> roles) {
+        Collection<Role> result = new ArrayList<>();
         try {
+
+        for (String name : roles) {
+            try {
+                Query query = entityManager.createQuery("FROM Role r WHERE r.name = :name");
+                query.setParameter("name", name);
+                result.add((Role) query.getSingleResult());
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+
+            Role newRole = new Role(name);
+            addRole(newRole);
+            name = newRole.getName();
             Query query = entityManager.createQuery("FROM Role r WHERE r.name = :name");
             query.setParameter("name", name);
-            return (Role) query.getSingleResult();
+            result.add((Role) query.getSingleResult());
+        }
+
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
-        Role newRole = new Role(name);
-        addRole(newRole);
-        name = newRole.getName();
-        try {
-            Query query = entityManager.createQuery("FROM Role r WHERE r.name = :name");
-            query.setParameter("name", name);
-            return (Role) query.getSingleResult();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return result;
     }
 
     @Transactional
@@ -105,9 +117,9 @@ public class UserDaoImpl implements UserDao {
 
     @Transactional
     @Override
-    public boolean updateUser(String id, String firstName, String lastName, String phoneNumber, String role, String login, String password) {
+    public boolean updateUser(String id, String firstName, String lastName, String phoneNumber, Collection<Role> roles, String login, String password) {
         try {
-            entityManager.merge(new User(Long.parseLong(id), firstName, lastName, login, password, Long.parseLong(phoneNumber), new Role(role)));
+            entityManager.merge(new User(Long.parseLong(id), firstName, lastName, login, password, Long.parseLong(phoneNumber), roles));
             return true;
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -117,9 +129,9 @@ public class UserDaoImpl implements UserDao {
 
     @Transactional
     @Override
-    public boolean updateUser(String id, String firstName, String lastName, String phoneNumber, String role, String login) {
+    public boolean updateUser(String id, String firstName, String lastName, String phoneNumber, Collection<Role> roles, String login) {
         try {
-            entityManager.merge(new User(Long.parseLong(id), firstName, lastName, login, getUserById(id).getPassword(), Long.parseLong(phoneNumber), new Role(role)));
+            entityManager.merge(new User(Long.parseLong(id), firstName, lastName, login, getUserById(id).getPassword(), Long.parseLong(phoneNumber), roles));
             return true;
         } catch (RuntimeException e) {
             e.printStackTrace();

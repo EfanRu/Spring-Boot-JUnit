@@ -12,7 +12,8 @@ function refresh_user_table() {
                 data += '<td>' + user.lastName + '</td>';
                 data += '<td>' + user.login + '</td>';
                 data += '<td>' + user.phoneNumber + '</td>';
-                data += '<td>' + user.role.name + '</td>';
+                // data += '<td>' + user.role.name + '</td>';
+                data += '<td>' + user.role + '</td>';
                 data += '<td>' +
                     '                                                <form class="deleteFromClass" action="/admin" method="delete" id="' + user.id + '">\n' +
                     '                                                    <button class="btn btn-danger btn-xs" type="button" name="id" value="' + user.id + '" id="delId"><span class="glyphicon glyphicon-trash"></span></button>\n' +

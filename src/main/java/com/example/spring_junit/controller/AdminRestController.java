@@ -1,6 +1,8 @@
 package com.example.spring_junit.controller;
 
+import com.example.spring_junit.model.Role;
 import com.example.spring_junit.model.User;
+import com.example.spring_junit.model.UserDto;
 import com.example.spring_junit.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -25,7 +29,18 @@ public class AdminRestController {
     }
 
     @PostMapping("/admin")
-    public ResponseEntity<?> addUser(@Valid @RequestBody User user, Errors errors) {
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserDto userDto, Errors errors) {
+        Collection<Role> roles = new ArrayList<>();
+        roles.add(new Role(userDto.getRole()));
+        User user = new User(
+                userDto.getId(),
+                userDto.getFirstName(),
+                userDto.getLastName(),
+                userDto.getLogin(),
+                userDto.getPassword(),
+                userDto.getPhoneNumber(),
+                roles
+        );
         if (userService.addUser(user)) {
             return ResponseEntity.ok().body(user);
         } else {

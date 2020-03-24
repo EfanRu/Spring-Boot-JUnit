@@ -10,26 +10,15 @@ import java.util.Objects;
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    @Column(name = "name")
+    @Column(name = "role_id", unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "role")
     private Collection<User> users;
 
     public Role() {}
 
-    public Role(Integer id) {
-        this.id = id;
-    }
-
     public Role(String name) {
-        this.name = name.toUpperCase();
-    }
-
-    public Role(Integer id, String name) {
-        this.id = id;
         this.name = name.toUpperCase();
     }
 
@@ -46,25 +35,16 @@ public class Role implements GrantedAuthority {
         this.name = name.toUpperCase();
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return Objects.equals(id, role.id) &&
-                Objects.equals(name.toUpperCase(), role.name.toUpperCase());
+        return Objects.equals(name.toUpperCase(), role.name.toUpperCase());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(name);
     }
 }

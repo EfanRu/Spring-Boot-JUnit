@@ -1,52 +1,19 @@
 package com.example.spring_junit.model;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.*;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-@Entity
-@Table(name = "users")
-public class User implements UserDetails {
-    @Id
-    @Column(name = "user_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserDto {
     private Long id;
-    @Column(name = "first_name")
     private String firstName;
-    @Column(name = "last_name")
     private String lastName;
-    @Column(name = "login")
     private String login;
-    @Column(name = "password")
     private String password;
-    @Column(name = "phone_number")
     private Long phoneNumber;
-//    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    @JoinColumn(name = "role_id")
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-    @JoinTable(
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Collection<Role> role;
-    @Transient
-    private boolean accountNonExpired = true;
-    @Transient
-    private boolean accountNonLocked = true;
-    @Transient
-    private boolean credentialsNonExpired = true;
-    @Transient
-    private boolean enabled = true;
+    private String role;
 
-    public User() {}
+    public UserDto() {}
 
-    public User(Long id, String firstName, String lastName, String login, String password, Long phoneNumber, Collection<Role> role) {
+    public UserDto(Long id, String firstName, String lastName, String login, String password, Long phoneNumber, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
@@ -56,7 +23,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public User(String firstName, String lastName, String login, String password, Long phoneNumber, Collection<Role> role) {
+    public UserDto(String firstName, String lastName, String login, String password, Long phoneNumber, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
@@ -64,40 +31,6 @@ public class User implements UserDetails {
         this.id = null;
         this.login = login;
         this.password = password;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        for (Role r : role) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + r.getName().toUpperCase()));
-        }
-        return authorities;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.login;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     public String getFirstName() {
@@ -132,11 +65,11 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public Collection<Role> getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Collection<Role> role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
@@ -178,7 +111,7 @@ public class User implements UserDetails {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
+        UserDto user = (UserDto) o;
         return Objects.equals(id, user.id) &&
                 Objects.equals(firstName, user.firstName) &&
                 Objects.equals(lastName, user.lastName) &&
