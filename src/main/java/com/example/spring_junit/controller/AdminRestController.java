@@ -64,7 +64,18 @@ public class AdminRestController {
     }
 
     @PutMapping(value = "/admin/{id}")
-    public User editUser(@RequestBody User user) {
+    public User editUser(@RequestBody UserDto userDto) {
+        Collection<Role> roles = new ArrayList<>();
+        roles.add(new Role(userDto.getRole()));
+        User user = new User(
+                userDto.getId(),
+                userDto.getFirstName(),
+                userDto.getLastName(),
+                userDto.getLogin(),
+                userDto.getPassword(),
+                userDto.getPhoneNumber(),
+                roles
+        );
         userService.updateUser(user);
         return user;
     }

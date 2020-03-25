@@ -2,7 +2,10 @@ package com.example.spring_junit.dao;
 
 import com.example.spring_junit.model.Role;
 import com.example.spring_junit.model.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,8 @@ public class UserDaoImpl implements UserDao {
     private EntityManagerFactory emf;
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
@@ -33,15 +38,40 @@ public class UserDaoImpl implements UserDao {
     @Override
     public boolean addUser(User user) {
         try {
+            //Add user in DB
+            Query userQuery = entityManager.createNativeQuery("INSERT INTO users VALUES(" +
+                    "null," +
+                    "'" + user.getFirstName() + "'," +
+                    "'" + user.getLastName() + "'," +
+                    "'" + user.getLogin() + "'," +
+                    "'" + user.getPassword() + "'," +
+                    "'" + user.getPhoneNumber() + "')");
+            userQuery.executeUpdate();
+            Query userIdQuery = entityManager.createNativeQuery("SELECT user_id FROM users WHERE login = '" + user.getLogin() + "'");
+            Long userId = Long.parseLong(userIdQuery.getSingleResult().toString());
+
             if (!isRoleContains(user)) {
                 for (Role r : user.getRole()) {
-                    entityManager.persist(r);
+//                    entityManager.persist(r);
+                        //Add role in DB if DB doesn't exist this role
+                        Query query = entityManager.createNativeQuery("INSERT INTO roles VALUES('" + r.getName().toUpperCase() + "')");
+                        query.executeUpdate();
                 }
+            }
+
+            //Add fond with users and them roles
+            for (Role r : user.getRole()) {
+                Query fondQuery = entityManager.createNativeQuery("INSERT INTO users_role VALUES(" +
+                        "" + userId + "," +
+                        "'" + r.getName() + "')");
+                fondQuery.executeUpdate();
             }
 
 //            user.setRole(getRoleByName(user.getRole()));
 
-            entityManager.persist(user);
+//            entityManager.persist(user);
+
+
             return true;
         } catch (RuntimeException e) {
             e.printStackTrace();
